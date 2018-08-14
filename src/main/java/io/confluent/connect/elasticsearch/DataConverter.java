@@ -169,10 +169,18 @@ public class DataConverter {
     JSONParser parser = new JSONParser();
     JSONObject json = (JSONObject) parser.parse(payload);
     
-    String si = (String) json.get("si");
+    final String si = (String) json.get("si");
+    try {
+      String arpu = (String) json.get("arpu");
+      json.put("arpu", Float.parseFloat(arpu));
+    }
+    catch (Exception e) {
+      System.out.println("Arpu format incorrect"); 
+    }
+    final String jsonText = json.toJSONString();
     
     final Long version = ignoreKey ? null : record.kafkaOffset();
-    return new IndexableRecord(new Key(index, type, si), payload, version);
+    return new IndexableRecord(new Key(index, type, si), jsonText, version);
   }
 
   private String getPayload(SinkRecord record, boolean ignoreSchema) {
