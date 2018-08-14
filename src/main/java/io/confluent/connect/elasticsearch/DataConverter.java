@@ -43,6 +43,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.*;
+
 import static io.confluent.connect.elasticsearch.ElasticsearchSinkConnectorConstants.MAP_KEY;
 import static io.confluent.connect.elasticsearch.ElasticsearchSinkConnectorConstants.MAP_VALUE;
 
@@ -162,8 +166,13 @@ public class DataConverter {
     }
 
     final String payload = getPayload(record, ignoreSchema);
+    JSONParser parser = new JSONParser();
+    JSONObject json = (JSONObject) parser.parse(payload);
+    
+    String si = (String) json.get("si");
+    
     final Long version = ignoreKey ? null : record.kafkaOffset();
-    return new IndexableRecord(new Key(index, type, id), payload, version);
+    return new IndexableRecord(new Key(index, type, si), payload, version);
   }
 
   private String getPayload(SinkRecord record, boolean ignoreSchema) {
